@@ -254,6 +254,30 @@ namespace Splunk.Logging
             trace.Close();
         }
 
+        [Trait("integration-tests", "Splunk.Logging.HttpEventCollectorEventInfoCoreTest")]
+        [Fact]
+        public void HttpEventCollectorEventInfoCoreTest()
+        {
+            // test setting timestamp
+            DateTime utcNow = DateTime.UtcNow;
+            double nowEpoch = (utcNow - new DateTime(1970, 1, 1)).TotalSeconds;
+
+            HttpEventCollectorEventInfo ei =
+                new HttpEventCollectorEventInfo(utcNow.AddHours(-1), null, null, null, null, null);
+
+            double epochTimestamp = double.Parse(ei.Timestamp);
+            double diff = Math.Ceiling(nowEpoch - epochTimestamp);
+            Assert.True(diff >= 3600.0);
+
+            // test default timestamp
+            ei = new HttpEventCollectorEventInfo(null, null, null, null, null);
+            utcNow = DateTime.UtcNow;
+            nowEpoch = (utcNow - new DateTime(1970, 1, 1)).TotalSeconds;
+            epochTimestamp = double.Parse(ei.Timestamp);
+            diff = Math.Ceiling(nowEpoch - epochTimestamp);
+            Assert.True(diff < 10.0);
+        }
+
         [Trait("integration-tests", "Splunk.Logging.HttpEventCollectorBatchingCountTest")]
         [Fact]
         public void HttpEventCollectorBatchingCountTest()
