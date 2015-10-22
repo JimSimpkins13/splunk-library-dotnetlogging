@@ -221,14 +221,44 @@ namespace Splunk.Logging
             DoSerialization(ei);
         }
 
-        private void DoSerialization(HttpEventCollectorEventInfo ei)
+        /// <summary>
+        /// Send an event to Splunk HTTP endpoint. Actual event send is done 
+        /// asynchronously and this method doesn't block client application.
+        /// </summary>
+        /// <param name="timestamp">Timestamp to use.</param>
+        /// <param name="data">Event data which is promoted.</param>
+        public void Send(
+            DateTime timestamp,
+            object data)
+        {
+            HttpEventCollectorEventInfo ei =
+                new HttpEventCollectorEventInfo(timestamp, null, null, null, data, metadata);
+
+            DoSerialization(ei, true);
+        }
+
+        /// <summary>
+        /// Do the event information serialization.
+        /// </summary>
+        /// <param name="eventInfo">HttpEventCollectorEventInfo</param>
+        /// <param name="promoteAuxiliaryData">If true promote the auxilary data object.</param>
+        private void DoSerialization(HttpEventCollectorEventInfo eventInfo, Boolean promoteAuxiliaryData = false)
         {
             // we use lock serializedEventsBatch to synchronize both 
             // serializedEventsBatch and serializedEvents
-            string serializedEventInfo = SerializeEventInfo(ei);
+            string serializedEventInfo = "";
+            if (promoteAuxiliaryData)
+            {
+                serializedEventInfo = SerializeEventInfo(eventInfo).Replace("\"data\":{", "").Replace("}}}", "}}");
+            }
+            else
+            {
+                serializedEventInfo = SerializeEventInfo(eventInfo);
+            }
+
             lock (eventsBatchLock)
             {
-                eventsBatch.Add(ei);
+                eventsBatch.Add(eventInfo);
                 serializedEventsBatch.Append(serializedEventInfo);
                 if (eventsBatch.Count >= batchSizeCount ||
                     serializedEventsBatch.Length >= batchSizeBytes)
