@@ -207,10 +207,11 @@ namespace Splunk.Logging
         /// <param name="data">Event data which is promoted.</param>
         public void Send(
             DateTime timestamp,
-            object data)
+            object data,
+            HttpEventCollectorEventInfo.Metadata metadataOverride = null)
         {
             HttpEventCollectorEventInfo ei =
-                new HttpEventCollectorEventInfo(timestamp, null, null, null, data, metadata);
+                new HttpEventCollectorEventInfo(timestamp, null, null, null, data, metadataOverride ?? metadata);
 
             DoSerialization(ei, true);
         }
@@ -220,7 +221,7 @@ namespace Splunk.Logging
         /// </summary>
         /// <param name="eventInfo">HttpEventCollectorEventInfo</param>
         /// <param name="promoteAuxiliaryData">If true promote the auxilary data object.</param>
-        private void DoSerialization(HttpEventCollectorEventInfo eventInfo, Boolean promoteAuxiliaryData = false)
+        private void DoSerialization(HttpEventCollectorEventInfo eventInfo, bool promoteAuxiliaryData = false)
         {
             // we use lock serializedEventsBatch to synchronize both 
             // serializedEventsBatch and serializedEvents
