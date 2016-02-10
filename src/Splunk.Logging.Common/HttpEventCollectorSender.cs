@@ -199,19 +199,26 @@ namespace Splunk.Logging
             DoSerialization(ei);
         }
 
+
+
         /// <summary>
         /// Send an event to Splunk HTTP endpoint. Actual event send is done 
         /// asynchronously and this method doesn't block client application.
         /// </summary>
         /// <param name="timestamp">Timestamp to use.</param>
         /// <param name="data">Event data which is promoted.</param>
+        /// <param name="metadataOverride">Metadata to use for this event.</param>
+        /// <param name="eventid">EventId that is maintained in the HttpEventCollectorEventInfo class but not serialized to Json.</param>
         public void Send(
             DateTime timestamp,
             object data,
-            HttpEventCollectorEventInfo.Metadata metadataOverride = null)
+            HttpEventCollectorEventInfo.Metadata metadataOverride = null,
+            string eventid = null)
         {
             HttpEventCollectorEventInfo ei =
                 new HttpEventCollectorEventInfo(timestamp, null, null, null, data, metadataOverride ?? metadata);
+
+            ei.EventId = eventid;
 
             DoSerialization(ei, true);
         }

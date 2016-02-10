@@ -112,6 +112,9 @@ namespace Splunk.Logging
             }
         }
 
+        [JsonIgnore]
+        public string EventId { get; set; }
+
         /// <summary>
         /// Event timestamp in epoch format.
         /// </summary>
